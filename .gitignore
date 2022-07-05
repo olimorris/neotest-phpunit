@@ -41,3 +41,5 @@ luac.out
 
 # Others
 .luarc.json
+/vendor
+.phpunit.result.cache
