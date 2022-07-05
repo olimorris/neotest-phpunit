@@ -25,7 +25,6 @@ local function generate_test_output(testcase, output_file)
 
   -- Treesitter starts line numbers from 0 so we subtract 1
   local test_id = test_attributes.file .. separator .. tonumber(test_attributes.line) - 1
-
   logger.info("PHPUnit id:", { test_id })
 
   local test = {
@@ -34,20 +33,14 @@ local function generate_test_output(testcase, output_file)
     output_file = output_file,
   }
 
-  if not testcase["failure"] and not testcase["error"] then
-    return test_id, test
-  end
-
-  test.status = "failed"
-  test.errors = { {
-    line = test_attributes.line,
-  } }
-
-  if testcase["failure"] then
-    test.short = testcase["failure"][1]
-  end
-  if testcase["error"] then
-    test.short = testcase["error"][1]
+  if testcase["failure"] or testcase["error"] then
+    test.status = "failed"
+    test.short = testcase["failure"] and testcase["failure"][1] or testcase["error"][1]
+    test.errors = {
+      {
+        line = test_attributes.line,
+      },
+    }
   end
 
   return test_id, test
