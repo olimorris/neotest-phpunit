@@ -21,29 +21,29 @@ end
 ---@param output_file string
 ---@return table
 local function generate_test_output(testcase, output_file)
-  local test = {}
-  local test_attr = testcase["_attr"]
-  local test_id = test_attr.file .. separator .. tonumber(test_attr.line) - 1
+  local test_attributes = testcase["_attr"]
+  -- Treesitter starts line numbers from 0 so we subtract 1
+  local test_id = test_attributes.file .. separator .. tonumber(test_attributes.line) - 1
 
   logger.info("PHPUnit id:", { test_id })
 
-  test[test_id] = {
+  local test = {
     status = "passed",
-    short = string.upper(test_attr.classname) .. "\n-> " .. "PASSED" .. " - " .. test_attr.name,
+    short = string.upper(test_attributes.classname) .. "\n-> " .. "PASSED" .. " - " .. test_attributes.name,
     output_file = output_file,
   }
 
   if testcase["failure"] then
-    test[test_id].status = "failed"
-    test[test_id].short = testcase["failure"][1]
-    test[test_id].errors = {
+    test.status = "failed"
+    test.short = testcase["failure"][1]
+    test.errors = {
       {
-        line = test_attr.line,
+        line = test_attributes.line,
       },
     }
   end
 
-  return test
+  return test_id, test
 end
 
 --- Parse PHPUnits XML output and return a table of test results
@@ -54,16 +54,27 @@ M.parse_xml_output = function(parsed_xml_output, output_file)
   local tests = {}
 
   for _, testsuites in pairs(parsed_xml_output.testsuites) do
-    if testsuites.testcase["_attr"] then
-      -- Single test
-      return generate_test_output(testsuites.testcase, output_file)
+    if testsuites["_attr"].file then
+      if testsuites.testcase["_attr"] then
+        -- Single tests
+        local test_id, test_output = generate_test_output(testsuites.testcase, output_file)
+        tests[test_id] = test_output
+      else
+        -- File tests
+        for _, testcase in pairs(testsuites.testcase) do
+          local test_id, test_output = generate_test_output(testcase, output_file)
+          tests[test_id] = test_output
+        end
+      end
     else
-      -- Multple tests
-      for _, testcase in pairs(testsuites.testcase) do
-        table.insert(tests, generate_test_output(testcase, output_file))
+      -- Dir tests
+      for _, testcase in pairs(testsuites.testsuite.testcase) do
+        local test_id, test_output = generate_test_output(testcase, output_file)
+        tests[test_id] = test_output
       end
     end
   end
+
   return tests
 end
 
