@@ -26,9 +26,7 @@ use({
 
 ## :rocket: Usage
 
-_NOTE_: All usages of `lua require('neotest').run.run` can be mapped to a command in your config (this is not included and should be done by yourself).
-
-#### Test single function
+#### Test single method
 
 To test a single test, hover over the test and run `lua require('neotest').run.run()`
 
@@ -47,7 +45,7 @@ e.g. `lua require('neotest').run.run(vim.fn.getcwd())`, presuming that vim's dir
 
 ## :gift: Contributing
 
-This project is maintained by the Neovim PHP community. Please raise a PR if you are interested in adding new functionality or fixing any bugs. When submitting a bug, please include an example spec that can be tested.
+This project is maintained by the Neovim PHP community. Please raise a PR if you are interested in adding new functionality or fixing any bugs. When submitting a bug, please include an example test that we can test against.
 
 To trigger the tests for the adapter, run:
 
