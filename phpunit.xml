@@ -11,5 +11,8 @@
         <testsuite name="Feature">
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
+        <testsuite name="Examples">
+            <directory suffix="Test.php">./tests/Examples</directory>
+        </testsuite>
     </testsuites>
 </phpunit>
