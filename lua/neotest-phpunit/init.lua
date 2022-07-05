@@ -30,6 +30,10 @@ end
 ---@return neotest.Tree | nil
 function NeotestAdapter.discover_positions(path)
   local query = [[
+    ((class_declaration
+      name: (name) @namespace.name (#match? @namespace.name "Test")
+    )) @namespace.definition
+
     ((method_declaration
       (name) @test.name (#match? @test.name "test")
     )) @test.definition
