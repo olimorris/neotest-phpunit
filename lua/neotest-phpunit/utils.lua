@@ -34,14 +34,20 @@ local function generate_test_output(testcase, output_file)
     output_file = output_file,
   }
 
+  if not testcase["failure"] and not testcase["error"] then
+    return test_id, test
+  end
+
+  test.status = "failed"
+  test.errors = { {
+    line = test_attributes.line,
+  } }
+
   if testcase["failure"] then
-    test.status = "failed"
     test.short = testcase["failure"][1]
-    test.errors = {
-      {
-        line = test_attributes.line,
-      },
-    }
+  end
+  if testcase["error"] then
+    test.short = testcase["error"][1]
   end
 
   return test_id, test
