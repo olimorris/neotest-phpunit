@@ -24,7 +24,7 @@ function M.print_table(tbl)
   require("pl.pretty").dump(tbl)
 end
 
----Recursively iterate through a deeply nested table to obtain certain keys
+---Recursively iterate through a deeply nested table to obtain specified keys
 ---@param data_table table
 ---@param key string
 ---@param output_table table
@@ -41,14 +41,14 @@ M.iterate_over = function(data_table, key, output_table)
   return output_table
 end
 
----Extract the failure messages from the data
----@param data table
+---Extract the failure messages from the tests
+---@param tests table,
 ---@return boolean|table
-local function errors_or_fails(data)
+local function errors_or_fails(tests)
   local errors_fails = {}
 
-  M.iterate_over(data, "error", errors_fails)
-  M.iterate_over(data, "failure", errors_fails)
+  M.iterate_over(tests, "error", errors_fails)
+  M.iterate_over(tests, "failure", errors_fails)
 
   if #errors_fails == 0 then
     return false
@@ -73,10 +73,10 @@ local function make_outputs(test, output_file)
     output_file = output_file,
   }
 
-  local test_fails = errors_or_fails(test)
-  if test_fails then
+  local test_failed = errors_or_fails(test)
+  if test_failed then
     test_output.status = "failed"
-    test_output.short = test_fails[1]["failure"] or test_fails[1]["errors"]
+    test_output.short = test_failed[1]["failure"] or test_failed[1]["errors"]
     test_output.errors = {
       {
         line = test_attr.line,
@@ -93,15 +93,14 @@ end
 ---@return neotest.Result[]
 M.get_test_results = function(parsed_xml_output, output_file)
   local tests = {}
-  local results = {}
-
   M.iterate_over(parsed_xml_output, "testcase", tests)
 
-  -- File or Dir tests have nesting unlike single tests
+  -- File and Dir tests have nesting which we need to remove
   if #tests[1] > 0 then
     tests = tests[1]
   end
 
+  local results = {}
   for _, test in pairs(tests) do
     local test_id, test_output = make_outputs(test, output_file)
     results[test_id] = test_output
