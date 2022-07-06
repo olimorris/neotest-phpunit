@@ -46,7 +46,7 @@ function NeotestAdapter.discover_positions(path)
   ]]
 
   return lib.treesitter.parse_positions(path, query, {
-    position_id = utils.generate_treesitter_id,
+    position_id = utils.make_test_id,
   })
 end
 
@@ -63,7 +63,7 @@ function NeotestAdapter.build_spec(args)
 
   local command = vim.tbl_flatten({
     binary,
-    position.path,
+    position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
   })
 
@@ -107,7 +107,7 @@ function NeotestAdapter.results(test, result, tree)
     return {}
   end
 
-  local ok, results = pcall(utils.parse_xml_output, parsed_data, output_file)
+  local ok, results = pcall(utils.get_test_results, parsed_data, output_file)
   if not ok then
     logger.error("Could not get test results")
     return {}
