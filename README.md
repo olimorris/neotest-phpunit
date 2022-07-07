@@ -4,7 +4,7 @@
 
 This plugin provides a [PHPUnit](https://phpunit.de) adapter for the [Neotest](https://github.com/nvim-neotest/neotest) framework.
 
-:warning: **This plugin is still in the early stages of development. Please test in anger against your existing PHPUnit tests** :warning:
+:warning: **This plugin is still in the early stages of development. Please test in against your PHPUnit tests** :warning:
 
 ## :package: Installation
 
