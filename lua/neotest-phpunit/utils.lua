@@ -87,6 +87,13 @@ local function make_outputs(test, output_file)
   return test_id, test_output
 end
 
+local function single_test(test, output_table)
+  for i = 1, #tests, 1 do
+    local test_id, test_output = make_outputs(tests[i], output_file)
+    results[test_id] = test_output
+  end
+end
+
 ---Get the test results from the parsed xml
 ---@param parsed_xml_output table
 ---@param output_file string
@@ -95,15 +102,21 @@ M.get_test_results = function(parsed_xml_output, output_file)
   local tests = {}
   M.iterate_over(parsed_xml_output, "testcase", tests)
 
-  -- File and Dir tests have nesting which we need to remove
-  if #tests[1] > 0 then
-    tests = tests[1]
+  -- Single test
+  if #tests[1] == 0 then
+    local test_id, test_output = make_outputs(tests[1], output_file)
+    return {
+      [test_id] = test_output
+    }
   end
 
+  -- Multiple tests
   local results = {}
-  for _, test in pairs(tests) do
-    local test_id, test_output = make_outputs(test, output_file)
-    results[test_id] = test_output
+  for i = 1, #tests, 1 do
+    for j = 1, #tests[i], 1 do
+      local test_id, test_output = make_outputs(tests[i][j], output_file)
+      results[test_id] = test_output
+    end
   end
 
   return results
