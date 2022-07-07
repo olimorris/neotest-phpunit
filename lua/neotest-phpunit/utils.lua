@@ -102,17 +102,12 @@ M.get_test_results = function(parsed_xml_output, output_file)
   local tests = {}
   M.iterate_over(parsed_xml_output, "testcase", tests)
 
-  -- Single test
-  if #tests[1] == 0 then
-    local test_id, test_output = make_outputs(tests[1], output_file)
-    return {
-      [test_id] = test_output
-    }
-  end
-
-  -- Multiple tests
   local results = {}
   for i = 1, #tests, 1 do
+    if #tests[i] == 0 then -- This is for files with only one test
+      local test_id, test_output = make_outputs(tests[i], output_file)
+      results[test_id] = test_output
+    end
     for j = 1, #tests[i], 1 do
       local test_id, test_output = make_outputs(tests[i][j], output_file)
       results[test_id] = test_output

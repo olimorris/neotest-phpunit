@@ -381,6 +381,12 @@ Failed asserting that false is true.
 -> PASSED - testRemoveFavoriteMovie]],
         status = "passed",
       },
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/some/deep/nesting/NestingTest.php::7"] = {
+        output_file = "/tmp/nvimhYaIPj/3",
+        short = [[NESTINGTEST
+-> PASSED - test_something_that_is_true]],
+        status = "passed",
+      },
       ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::13"] = {
         errors = {
           {
