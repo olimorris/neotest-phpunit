@@ -4,6 +4,8 @@
 
 This plugin provides a [PHPUnit](https://phpunit.de) adapter for the [Neotest](https://github.com/nvim-neotest/neotest) framework.
 
+:warning: **This plugin is still in the early stages of development. Please test in anger against your existing PHPUnit tests** :warning:
+
 ## :package: Installation
 
 Install the plugin using packer:
@@ -42,8 +44,7 @@ To test a directory run `lua require('neotest').run.run("path/to/directory")`
 
 #### Test suite
 
-To test the full test suite run `lua require('neotest').run.run("path/to/root_project")`
-e.g. `lua require('neotest').run.run(vim.fn.getcwd())`, presuming that vim's directory is the same as the project root.
+To test the full test suite run `lua require('neotest').run.run({ suite = true })`
 
 ## :gift: Contributing
 
@@ -56,6 +57,7 @@ To trigger the tests for the adapter, run:
 ```
 
 ## :clap: Thanks
+
 A special thanks to the following contributers:
 
 - [boonkerz](https://github.com/boonkerz)
