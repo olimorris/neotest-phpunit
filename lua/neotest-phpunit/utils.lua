@@ -17,13 +17,6 @@ M.make_test_id = function(position)
   return id
 end
 
----Pretty print a table
----@param tbl table
----@return string
-function M.print_table(tbl)
-  require("pl.pretty").dump(tbl)
-end
-
 ---Recursively iterate through a deeply nested table to obtain specified keys
 ---@param data_table table
 ---@param key string
@@ -85,13 +78,6 @@ local function make_outputs(test, output_file)
   end
 
   return test_id, test_output
-end
-
-local function single_test(test, output_table)
-  for i = 1, #tests, 1 do
-    local test_id, test_output = make_outputs(tests[i], output_file)
-    results[test_id] = test_output
-  end
 end
 
 ---Get the test results from the parsed xml
