@@ -22,13 +22,13 @@ end
 ---@param key string
 ---@param output_table table
 ---@return table
-M.iterate_over = function(data_table, key, output_table)
+local function iterate_key(data_table, key, output_table)
   if type(data_table) == "table" then
     for k, v in pairs(data_table) do
       if key == k then
         table.insert(output_table, v)
       end
-      M.iterate_over(v, key, output_table)
+      iterate_key(v, key, output_table)
     end
   end
   return output_table
@@ -40,8 +40,8 @@ end
 local function errors_or_fails(tests)
   local errors_fails = {}
 
-  M.iterate_over(tests, "error", errors_fails)
-  M.iterate_over(tests, "failure", errors_fails)
+  iterate_key(tests, "error", errors_fails)
+  iterate_key(tests, "failure", errors_fails)
 
   if #errors_fails == 0 then
     return false
@@ -80,25 +80,33 @@ local function make_outputs(test, output_file)
   return test_id, test_output
 end
 
+---Iterate through test results and create a table of test IDs and outputs
+---@param tests table
+---@param output_file string
+---@param output_table table
+---@return table
+local function iterate_test_outputs(tests, output_file, output_table)
+  for i = 1, #tests, 1 do
+    if #tests[i] == 0 then
+      local test_id, test_output = make_outputs(tests[i], output_file)
+      output_table[test_id] = test_output
+    else
+      iterate_test_outputs(tests[i], output_file, output_table)
+    end
+  end
+  return output_table
+end
+
 ---Get the test results from the parsed xml
 ---@param parsed_xml_output table
 ---@param output_file string
 ---@return neotest.Result[]
 M.get_test_results = function(parsed_xml_output, output_file)
   local tests = {}
-  M.iterate_over(parsed_xml_output, "testcase", tests)
+  iterate_key(parsed_xml_output, "testcase", tests)
 
   local results = {}
-  for i = 1, #tests, 1 do
-    if #tests[i] == 0 then -- This is for files with only one test
-      local test_id, test_output = make_outputs(tests[i], output_file)
-      results[test_id] = test_output
-    end
-    for j = 1, #tests[i], 1 do
-      local test_id, test_output = make_outputs(tests[i][j], output_file)
-      results[test_id] = test_output
-    end
-  end
+  iterate_test_outputs(tests, output_file, results)
 
   return results
 end
