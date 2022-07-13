@@ -109,7 +109,7 @@ function NeotestAdapter.results(test, result, tree)
 
   local ok, results = pcall(utils.get_test_results, parsed_data, output_file)
   if not ok then
-    logger.error("Could not get test results")
+    logger.error("Could not get test results", output_file)
     return {}
   end
 
