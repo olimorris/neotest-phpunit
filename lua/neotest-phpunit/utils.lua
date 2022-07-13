@@ -102,13 +102,8 @@ end
 ---@param output_file string
 ---@return neotest.Result[]
 M.get_test_results = function(parsed_xml_output, output_file)
-  local tests = {}
-  iterate_key(parsed_xml_output, "testcase", tests)
-
-  local results = {}
-  iterate_test_outputs(tests, output_file, results)
-
-  return results
+  local tests = iterate_key(parsed_xml_output, "testcase", {})
+  return iterate_test_outputs(tests, output_file, {})
 end
 
 return M
