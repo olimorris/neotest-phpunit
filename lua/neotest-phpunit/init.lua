@@ -57,7 +57,16 @@ function NeotestAdapter.build_spec(args)
   local results_path = async.fn.tempname()
 
   local binary = "phpunit"
-  if vim.fn.filereadable("vendor/bin/phpunit") then
+
+  local cwd = nil;
+
+  -- If we can find a closer phpunit executable we can use that.
+  local relativeBinaryPath = utils.find_node_modules_ancestor(position.path) .. "/vendor/bin/phpunit";
+  if vim.fn.filereadable(relativeBinaryPath) then
+    -- We need to make sure it runs from the working directory so it picks up the correct phpunit config.
+    cwd = utils.find_node_modules_ancestor(position.path);
+    binary = relativeBinaryPath
+  elseif vim.fn.filereadable("vendor/bin/phpunit") then
     binary = "vendor/bin/phpunit"
   end
 
@@ -80,6 +89,7 @@ function NeotestAdapter.build_spec(args)
   end
 
   return {
+    cwd = cwd,
     command = command,
     context = {
       results_path = results_path,

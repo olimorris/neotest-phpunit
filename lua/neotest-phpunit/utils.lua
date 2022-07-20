@@ -1,4 +1,5 @@
 local logger = require("neotest.logging")
+local uv = vim.loop
 
 local M = {}
 local separator = "::"
@@ -104,6 +105,81 @@ end
 M.get_test_results = function(parsed_xml_output, output_file)
   local tests = iterate_key(parsed_xml_output, "testcase", {})
   return iterate_test_outputs(tests, output_file, {})
+end
+
+local is_windows = uv.os_uname().version:match("Windows")
+
+local function is_fs_root(path)
+  if is_windows then
+    return path:match("^%a:$")
+  else
+    return path == "/"
+  end
+end
+
+local function dirname(path)
+  local strip_dir_pat = "/([^/]+)$"
+  local strip_sep_pat = "/$"
+  if not path or #path == 0 then
+    return
+  end
+  local result = path:gsub(strip_sep_pat, ""):gsub(strip_dir_pat, "")
+  if #result == 0 then
+    if is_windows then
+      return path:sub(1, 2):upper()
+    else
+      return "/"
+    end
+  end
+  return result
+end
+
+local function iterate_parents(path)
+  local function it(_, v)
+    if v and not is_fs_root(v) then
+      v = dirname(v)
+    else
+      return
+    end
+    if v and uv.fs_realpath(v) then
+      return v, path
+    else
+      return
+    end
+  end
+  return it, path, path
+end
+
+function M.search_ancestors(startpath, func)
+  if func(startpath) then
+    return startpath
+  end
+  local guard = 100
+  for path in iterate_parents(startpath) do
+    -- Prevent infinite recursion if our algorithm breaks
+    guard = guard - 1
+    if guard == 0 then
+      return
+    end
+
+    if func(path) then
+      return path
+    end
+  end
+end
+
+local function exists(filename)
+  local stat = uv.fs_stat(filename)
+  return stat and stat.type or false
+end
+
+function M.find_node_modules_ancestor(startpath)
+  return M.search_ancestors(startpath, function(path)
+    local joined = table.concat(vim.tbl_flatten({path, "vendor"}), "/");
+    if exists(joined) == "directory" then
+      return path
+    end
+  end)
 end
 
 return M
