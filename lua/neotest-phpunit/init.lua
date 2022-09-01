@@ -57,7 +57,10 @@ function NeotestAdapter.build_spec(args)
   local results_path = async.fn.tempname()
 
   local binary = "phpunit"
-  if vim.fn.filereadable("vendor/bin/phpunit") then
+  -- If laravel, then use artisan test for nice output
+  if vim.fn.filereadable("artisan") then
+    binary = "php artisan test"
+  elseif vim.fn.filereadable("vendor/bin/phpunit") then
     binary = "vendor/bin/phpunit"
   end
 
@@ -80,7 +83,7 @@ function NeotestAdapter.build_spec(args)
   end
 
   return {
-    command = command,
+    command = table.concat(command, " "),
     context = {
       results_path = results_path,
     },
