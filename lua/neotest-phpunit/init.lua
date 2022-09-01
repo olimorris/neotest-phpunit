@@ -50,16 +50,24 @@ function NeotestAdapter.discover_positions(path)
   })
 end
 
+---@return string
+local function get_phpunit_cmd()
+  local binary = "phpunit"
+
+  if vim.fn.filereadable("vendor/bin/phpunit") then
+    binary = "vendor/bin/phpunit"
+  end
+
+  return binary
+end
+
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec | nil
 function NeotestAdapter.build_spec(args)
   local position = args.tree:data()
   local results_path = async.fn.tempname()
 
-  local binary = "phpunit"
-  if vim.fn.filereadable("vendor/bin/phpunit") then
-    binary = "vendor/bin/phpunit"
-  end
+  local binary = get_phpunit_cmd()
 
   local command = vim.tbl_flatten({
     binary,
@@ -116,8 +124,19 @@ function NeotestAdapter.results(test, result, tree)
   return results
 end
 
+local is_callable = function(obj)
+  return type(obj) == "function" or (type(obj) == "table" and obj.__call)
+end
+
 setmetatable(NeotestAdapter, {
-  __call = function()
+  __call = function(_, opts)
+    if is_callable(opts.phpunit_cmd) then
+      get_phpunit_cmd = opts.phpunit_cmd
+    elseif opts.phpunit_cmd then
+      get_phpunit_cmd = function()
+        return opts.phpunit_cmd
+      end
+    end
     return NeotestAdapter
   end,
 })
