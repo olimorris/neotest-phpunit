@@ -46,7 +46,7 @@ function NeotestAdapter.discover_positions(path)
   ]]
 
   return lib.treesitter.parse_positions(path, query, {
-    position_id = utils.make_test_id,
+    position_id = "require('neotest-phpunit.utils').make_test_id",
   })
 end
 
