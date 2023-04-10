@@ -22,7 +22,7 @@ NeotestAdapter.root = lib.files.match_root_pattern("composer.json", "phpunit.xml
 ---@param file_path string
 ---@return boolean
 function NeotestAdapter.is_test_file(file_path)
-  if string.match(file_path, "vendor/") or not string.match(file_path, "tests/") then
+  if string.match(file_path, "vendor/") or not string.match(file_path, "[Tt]ests/") then
     return false
   end
   return vim.endswith(file_path, "Test.php")
