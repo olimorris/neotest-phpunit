@@ -10,7 +10,13 @@ class ExampleTest extends TestCase
     }
 
     /** @test */
-    public function this_should_fail()
+    public function test_this_should_fail()
+    {
+        $this->assertTrue(false);
+    }
+
+    /** @test */
+    public function this_should_fail_as_well()
     {
         $this->assertTrue(false);
     }
