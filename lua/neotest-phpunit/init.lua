@@ -85,6 +85,9 @@ function NeotestAdapter.build_spec(args)
       position.name,
     })
 
+    logger.info("position.path:", { position.path })
+    logger.info("--filter position.name:", { position.name })
+
     command = vim.tbl_flatten({
       command,
       script_args,
