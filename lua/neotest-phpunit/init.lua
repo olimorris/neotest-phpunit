@@ -82,7 +82,7 @@ function NeotestAdapter.build_spec(args)
   if position.type == "test" then
     local script_args = vim.tbl_flatten({
       "--filter",
-      position.name,
+      '::' .. position.name .. '( with data set .*)?$',
     })
 
     logger.info("position.path:", { position.path })
