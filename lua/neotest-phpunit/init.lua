@@ -6,6 +6,7 @@ end
 local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local utils = require("neotest-phpunit.utils")
+local config = require("neotest-phpunit.config")
 
 ---@class neotest.Adapter
 ---@field name string
@@ -16,16 +17,38 @@ local NeotestAdapter = { name = "neotest-phpunit" }
 ---@async
 ---@param dir string @Directory to treat as cwd
 ---@return string | nil @Absolute root dir of test suite
-NeotestAdapter.root = lib.files.match_root_pattern("composer.json", "phpunit.xml")
+function NeotestAdapter.root(dir)
+  local result = nil
+  local root_files =
+    vim.list_extend(config.get_root_files(), { "composer.json", "phpunit.xml", ".gitignore" })
+
+  for _, root_file in ipairs(root_files) do
+    result = lib.files.match_root_pattern(root_file)(dir)
+    if result then break end
+  end
+
+  return result
+end
 
 ---@async
 ---@param file_path string
 ---@return boolean
 function NeotestAdapter.is_test_file(file_path)
-  if string.match(file_path, "vendor/") or not string.match(file_path, "[Tt]ests/") then
-    return false
-  end
   return vim.endswith(file_path, "Test.php")
+end
+
+---Filter directories when searching for test files
+---@async
+---@param name string Name of directory
+---@return boolean
+function NeotestAdapter.filter_dir(name)
+  local filter_dirs = vim.list_extend(config.get_filter_dirs(), { ".git", "node_modules" })
+
+  for _, filter_dir in ipairs(filter_dirs) do
+    if name == filter_dir then return false end
+  end
+
+  return true
 end
 
 ---Given a file path, parse all the tests within it.
@@ -54,16 +77,6 @@ function NeotestAdapter.discover_positions(path)
   })
 end
 
----@return string
-local function get_phpunit_cmd()
-  local binary = "phpunit"
-
-  if vim.fn.filereadable("vendor/bin/phpunit") then
-    binary = "vendor/bin/phpunit"
-  end
-
-  return binary
-end
 
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec | nil
@@ -71,10 +84,8 @@ function NeotestAdapter.build_spec(args)
   local position = args.tree:data()
   local results_path = async.fn.tempname()
 
-  local binary = get_phpunit_cmd()
-
   local command = vim.tbl_flatten({
-    binary,
+    config.get_phpunit_cmd(),
     position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
   })
@@ -138,10 +149,24 @@ end
 setmetatable(NeotestAdapter, {
   __call = function(_, opts)
     if is_callable(opts.phpunit_cmd) then
-      get_phpunit_cmd = opts.phpunit_cmd
+      config.get_phpunit_cmd = opts.phpunit_cmd
     elseif opts.phpunit_cmd then
-      get_phpunit_cmd = function()
+      config.get_phpunit_cmd = function()
         return opts.phpunit_cmd
+      end
+    end
+    if is_callable(opts.root_files) then
+      config.get_root_files = opts.root_files
+    elseif opts.root_files then
+      config.get_root_files = function()
+        return opts.root_files
+      end
+    end
+    if is_callable(opts.filter_dirs) then
+      config.get_filter_dirs = opts.filter_dirs
+    elseif opts.filter_dirs then
+      config.get_filter_dirs = function()
+        return opts.filter_dirs
       end
     end
     return NeotestAdapter
