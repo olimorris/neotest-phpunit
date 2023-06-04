@@ -5,11 +5,11 @@ M.get_phpunit_cmd = function()
 end
 
 M.get_root_files = function()
-  return {}
+  return { "composer.json", "phpunit.xml", ".gitignore" }
 end
 
 M.get_filter_dirs = function()
-  return {}
+  return { ".git", "node_modules" }
 end
 
 return M

@@ -90,7 +90,7 @@ require("neotest-phpunit")({
 
 ### Setting the root directory
 
-For Neotest adapters to work, they need to define a project root whereby the process of discovering tests can take place. By default, the adapter looks for a `composer.json`, `phpunit.xml` or `.gitignore` file. These can be added to with:
+For Neotest adapters to work, they need to define a project root whereby the process of discovering tests can take place. By default, the adapter looks for a `composer.json`, `phpunit.xml` or `.gitignore` file. These can be changed with:
 
 ```lua
 require("neotest-phpunit")({
@@ -98,13 +98,29 @@ require("neotest-phpunit")({
 })
 ```
 
+You can even set `root_files` with a function which returns a table:
+
+```lua
+require("neotest-phpunit")({
+  root_files = function() return { "README.md" } end
+})
+```
+
 ### Filtering directories
 
-By default, the adapter will search test files in all dirs in the root with the exception of `node_modules` and `.git`. In a big project, this may result in slow performance. You can also add additional directories to filter out:
+By default, the adapter will search test files in all dirs in the root with the exception of `node_modules` and `.git`. You can change this with:
 
 ```lua
 require("neotest-phpunit")({
   filter_dirs = { "vendor" }
+})
+```
+
+You can even set `filter_dirs` with a function which returns a table:
+
+```lua
+require("neotest-phpunit")({
+  filter_dirs = function() return { "vendor" } end
 })
 ```
 
