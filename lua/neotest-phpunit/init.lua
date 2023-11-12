@@ -8,6 +8,23 @@ local logger = require("neotest.logging")
 local utils = require("neotest-phpunit.utils")
 local config = require("neotest-phpunit.config")
 
+local dap_configuration
+
+local function get_strategy_config(strategy)
+  local config = {
+    dap = function()
+      return vim.tbl_extend("keep", {
+        type = 'php',
+        name = "Neotest Debugger",
+        cwd = async.fn.getcwd(),
+      }, dap_configuration or {})
+    end,
+  }
+  if config[strategy] then
+    return config[strategy]()
+  end
+end
+
 ---@class neotest.Adapter
 ---@field name string
 local NeotestAdapter = { name = "neotest-phpunit" }
@@ -101,11 +118,13 @@ function NeotestAdapter.build_spec(args)
     })
   end
 
+  ---@type neotest.RunSpec
   return {
     command = command,
     context = {
       results_path = results_path,
     },
+    strategy = get_strategy_config(args.strategy),
   }
 end
 
@@ -164,6 +183,9 @@ setmetatable(NeotestAdapter, {
       config.get_filter_dirs = function()
         return opts.filter_dirs
       end
+    end
+    if type(opts.dap) == "table" then
+      dap_configuration = opts.dap
     end
     return NeotestAdapter
   end,
