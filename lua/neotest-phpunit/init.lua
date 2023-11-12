@@ -11,7 +11,7 @@ local config = require("neotest-phpunit.config")
 local dap_configuration
 
 local function get_strategy_config(strategy)
-  local config = {
+  local cfg = {
     dap = function()
       return vim.tbl_extend("keep", {
         type = 'php',
@@ -20,8 +20,8 @@ local function get_strategy_config(strategy)
       }, dap_configuration or {})
     end,
   }
-  if config[strategy] then
-    return config[strategy]()
+  if cfg[strategy] then
+    return cfg[strategy]()
   end
 end
 
