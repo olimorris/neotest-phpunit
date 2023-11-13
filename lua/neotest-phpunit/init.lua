@@ -10,7 +10,7 @@ local config = require("neotest-phpunit.config")
 
 local dap_configuration
 
-local function get_strategy_config(strategy, command, args)
+local function get_strategy_config(strategy, program, args)
   local cfg = {
     dap = function()
       vim.validate({ dap = {
@@ -18,15 +18,25 @@ local function get_strategy_config(strategy, command, args)
         function (val)
           local valid = type(val) == "table" and not vim.tbl_isempty(val)
 
-          return valid, 'Configure `dap` field (like in dap.configurations.php) before using this strategy'
+          return valid, "Configure `dap` field (like in dap.configurations.php) before using this strategy"
         end,
-        'not empty table'
+        "not empty table"
       }})
+      vim.validate({
+        phpunit_cmd = {
+          program,
+          function (val)
+            return type(val) == string, "For `dap` strategy `phpunit_cmd` must be (or return) string."
+          end,
+          "string",
+        }
+      })
+
       return vim.tbl_extend("keep", {
         type = "php",
         name = "Neotest Debugger",
         cwd = async.fn.getcwd(),
-        program = command,
+        program = program,
         args = args,
         runtimeArgs = {"-dzend_extension=xdebug.so"},
       }, dap_configuration or {})
