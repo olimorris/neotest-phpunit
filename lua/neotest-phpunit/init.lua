@@ -13,6 +13,15 @@ local dap_configuration
 local function get_strategy_config(strategy, command, args)
   local cfg = {
     dap = function()
+      vim.validate({ dap = {
+        dap_configuration,
+        function (val)
+          local valid = type(val) == "table" and not vim.tbl_isempty(val)
+
+          return valid, 'Configure `dap` field (like in dap.configurations.php) before using this strategy'
+        end,
+        'not empty table'
+      }})
       return vim.tbl_extend("keep", {
         type = "php",
         name = "Neotest Debugger",
