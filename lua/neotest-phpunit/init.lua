@@ -10,13 +10,16 @@ local config = require("neotest-phpunit.config")
 
 local dap_configuration
 
-local function get_strategy_config(strategy)
+local function get_strategy_config(strategy, command, args)
   local cfg = {
     dap = function()
       return vim.tbl_extend("keep", {
-        type = 'php',
+        type = "php",
         name = "Neotest Debugger",
         cwd = async.fn.getcwd(),
+        program = command,
+        args = args,
+        runtimeArgs = {"-dzend_extension=xdebug.so"},
       }, dap_configuration or {})
     end,
   }
@@ -96,15 +99,15 @@ end
 function NeotestAdapter.build_spec(args)
   local position = args.tree:data()
   local results_path = async.fn.tempname()
+  local program = config.get_phpunit_cmd()
 
-  local command = vim.tbl_flatten({
-    config.get_phpunit_cmd(),
+  local script_args = {
     position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
-  })
+  }
 
   if position.type == "test" then
-    local script_args = vim.tbl_flatten({
+    local filter_args = vim.tbl_flatten({
       "--filter",
       '::' .. position.name .. '( with data set .*)?$',
     })
@@ -112,11 +115,16 @@ function NeotestAdapter.build_spec(args)
     logger.info("position.path:", { position.path })
     logger.info("--filter position.name:", { position.name })
 
-    command = vim.tbl_flatten({
-      command,
+    script_args = vim.tbl_flatten({
       script_args,
+      filter_args,
     })
   end
+
+  local command = vim.tbl_flatten({
+    program,
+    script_args,
+  })
 
   ---@type neotest.RunSpec
   return {
@@ -124,7 +132,8 @@ function NeotestAdapter.build_spec(args)
     context = {
       results_path = results_path,
     },
-    strategy = get_strategy_config(args.strategy),
+    strategy = get_strategy_config(args.strategy, program, script_args),
+    env = args.env or config.get_env(),
   }
 end
 
@@ -182,6 +191,13 @@ setmetatable(NeotestAdapter, {
     elseif opts.filter_dirs then
       config.get_filter_dirs = function()
         return opts.filter_dirs
+      end
+    end
+    if is_callable(opts.env) then
+      config.get_env = opts.env
+    elseif type(opts.env) == "table" then
+      config.get_env = function ()
+        return opts.env
       end
     end
     if type(opts.dap) == "table" then
