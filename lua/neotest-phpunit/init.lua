@@ -22,7 +22,9 @@ function NeotestAdapter.root(dir)
 
   for _, root_file in ipairs(config.get_root_files()) do
     result = lib.files.match_root_pattern(root_file)(dir)
-    if result then break end
+    if result then
+      break
+    end
   end
 
   return result
@@ -41,7 +43,9 @@ end
 ---@return boolean
 function NeotestAdapter.filter_dir(name)
   for _, filter_dir in ipairs(config.get_filter_dirs()) do
-    if name == filter_dir then return false end
+    if name == filter_dir then
+      return false
+    end
   end
 
   return true
@@ -73,26 +77,26 @@ function NeotestAdapter.discover_positions(path)
   })
 end
 
-
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec | nil
 function NeotestAdapter.build_spec(args)
   local position = args.tree:data()
-  local results_path = async.fn.tempname()
+  local spec_path = config.transform_spec_path(position.path)
+  local results_path = config.results_path()
 
   local command = vim.tbl_flatten({
     config.get_phpunit_cmd(),
-    position.name ~= "tests" and position.path,
+    position.name ~= "tests" and spec_path,
     "--log-junit=" .. results_path,
   })
 
   if position.type == "test" then
     local script_args = vim.tbl_flatten({
       "--filter",
-      '::' .. position.name .. '( with data set .*)?$',
+      "::" .. position.name .. "( with data set .*)?$",
     })
 
-    logger.info("position.path:", { position.path })
+    logger.info("spec_path:", { spec_path })
     logger.info("--filter position.name:", { position.name })
 
     command = vim.tbl_flatten({
@@ -163,6 +167,20 @@ setmetatable(NeotestAdapter, {
     elseif opts.filter_dirs then
       config.get_filter_dirs = function()
         return opts.filter_dirs
+      end
+    end
+    if is_callable(opts.transform_spec_path) then
+      config.transform_spec_path = opts.transform_spec_path
+    elseif opts.transform_spec_path then
+      config.transform_spec_path = function()
+        return opts.transform_spec_path
+      end
+    end
+    if is_callable(opts.results_path) then
+      config.results_path = opts.results_path
+    elseif opts.results_path then
+      config.results_path = function()
+        return opts.results_path
       end
     end
     return NeotestAdapter
