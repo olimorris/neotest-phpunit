@@ -128,7 +128,7 @@ require("neotest-phpunit")({
 
 ### Debugging with `dap` strategy
 
-You need to install and configure [nvim-dap](https://github.com/mfussenegger/nvim-dap) first. For example if you have
+You need to install and configure [nvim-dap](https://github.com/mfussenegger/nvim-dap) with [vscode-php-debug](https://github.com/xdebug/vscode-php-debug) first. For example if you have
 ```lua
 dap.configurations.php = {
   {
