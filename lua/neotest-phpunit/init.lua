@@ -26,7 +26,7 @@ local function get_strategy_config(strategy, program, args)
         phpunit_cmd = {
           program,
           function (val)
-            return type(val) == string, "For `dap` strategy `phpunit_cmd` must be (or return) string."
+            return type(val) == "string", "For `dap` strategy `phpunit_cmd` must be (or return) string."
           end,
           "string",
         }
