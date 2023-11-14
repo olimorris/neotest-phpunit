@@ -165,7 +165,7 @@ require("neotest-phpunit")({
 })
 ```
 
-If you run a test with `dap` strategy from the summary window (by default by `d`) and see that window content replaced by debugged buffer content consider setting `dap.defaults.fallback.switchbuf` or Neovim level `switchbuf`, f.e.
+If you run a test with `dap` strategy from the summary window (by default by `d`) and see that window content replaced by debugged buffer content then consider setting `dap.defaults.fallback.switchbuf` or Neovim level `switchbuf`, f.e.
 ```lua
 dap.defaults.fallback.switchbuf = "useopen"
 ```
