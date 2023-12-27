@@ -38,7 +38,7 @@ local function get_strategy_config(strategy, program, args)
         cwd = async.fn.getcwd(),
         program = program,
         args = args,
-        runtimeArgs = {"-dzend_extension=xdebug.so"},
+        runtimeArgs = { "-dzend_extension=xdebug.so" },
       }, dap_configuration or {})
     end,
   }
