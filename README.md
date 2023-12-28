@@ -66,10 +66,12 @@ use({
 adapters = {
   require("neotest-phpunit")({
     phpunit_cmd = function()
-      return "vendor/bin/phpunit"
+      return "vendor/bin/phpunit" -- for `dap` strategy then it must return string (table values will cause validation error)
     end,
     root_files = { "composer.json", "phpunit.xml", ".gitignore" },
-    filter_dirs = { ".git", "node_modules" }
+    filter_dirs = { ".git", "node_modules" },
+    env = {}, -- for example {XDEBUG_CONFIG = 'idekey=neotest'}
+    dap = nil, -- to configure `dap` strategy put single element from `dap.configurations.php`
   }),
 }
 ```
@@ -122,6 +124,50 @@ You can even set `filter_dirs` with a function which returns a table:
 require("neotest-phpunit")({
   filter_dirs = function() return { "vendor" } end
 })
+```
+
+### Debugging with `dap` strategy
+
+You need to install and configure [nvim-dap](https://github.com/mfussenegger/nvim-dap) with [vscode-php-debug](https://github.com/xdebug/vscode-php-debug) first. For example if you have
+```lua
+dap.configurations.php = {
+  {
+    log = true,
+    type = "php",
+    request = "launch",
+    name = "Listen for XDebug",
+    port = 9003,
+    stopOnEntry = false,
+    xdebugSettings = {
+      max_children = 512,
+      max_data = 1024,
+      max_depth = 4,
+    },
+    breakpoints = {
+      exception = {
+        Notice = false,
+        Warning = false,
+        Error = false,
+        Exception = false,
+        ["*"] = false,
+      },
+    },
+  }
+}
+```
+you can set
+```lua
+require("neotest-phpunit")({
+  env = {
+      XDEBUG_CONFIG = "idekey=neotest",
+  },
+  dap = dap.configurations.php[1],
+})
+```
+
+If you run a test with `dap` strategy from the summary window (by default by `d`) and see that window content replaced by debugged buffer content then consider setting `dap.defaults.fallback.switchbuf` or Neovim level [`switchbuf`](https://neovim.io/doc/user/options.html#'switchbuf'), f.e.
+```lua
+dap.defaults.fallback.switchbuf = "useopen"
 ```
 
 ## :rocket: Usage

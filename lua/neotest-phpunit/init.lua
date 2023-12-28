@@ -8,6 +8,45 @@ local logger = require("neotest.logging")
 local utils = require("neotest-phpunit.utils")
 local config = require("neotest-phpunit.config")
 
+local dap_configuration
+
+local function get_strategy_config(strategy, program, args)
+  local cfg = {
+    dap = function()
+      vim.validate({ dap = {
+        dap_configuration,
+        function (val)
+          local valid = type(val) == "table" and not vim.tbl_isempty(val)
+
+          return valid, "Configure `dap` field (like in dap.configurations.php) before using this strategy"
+        end,
+        "not empty table"
+      }})
+      vim.validate({
+        phpunit_cmd = {
+          program,
+          function (val)
+            return type(val) == "string", "For `dap` strategy `phpunit_cmd` must be (or return) string."
+          end,
+          "string",
+        }
+      })
+
+      return vim.tbl_extend("keep", {
+        type = "php",
+        name = "Neotest Debugger",
+        cwd = async.fn.getcwd(),
+        program = program,
+        args = args,
+        runtimeArgs = { "-dzend_extension=xdebug.so" },
+      }, dap_configuration or {})
+    end,
+  }
+  if cfg[strategy] then
+    return cfg[strategy]()
+  end
+end
+
 ---@class neotest.Adapter
 ---@field name string
 local NeotestAdapter = { name = "neotest-phpunit" }
@@ -79,15 +118,15 @@ end
 function NeotestAdapter.build_spec(args)
   local position = args.tree:data()
   local results_path = async.fn.tempname()
+  local program = config.get_phpunit_cmd()
 
-  local command = vim.tbl_flatten({
-    config.get_phpunit_cmd(),
+  local script_args = {
     position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
-  })
+  }
 
   if position.type == "test" then
-    local script_args = vim.tbl_flatten({
+    local filter_args = vim.tbl_flatten({
       "--filter",
       '::' .. position.name .. '( with data set .*)?$',
     })
@@ -95,17 +134,25 @@ function NeotestAdapter.build_spec(args)
     logger.info("position.path:", { position.path })
     logger.info("--filter position.name:", { position.name })
 
-    command = vim.tbl_flatten({
-      command,
+    script_args = vim.tbl_flatten({
       script_args,
+      filter_args,
     })
   end
 
+  local command = vim.tbl_flatten({
+    program,
+    script_args,
+  })
+
+  ---@type neotest.RunSpec
   return {
     command = command,
     context = {
       results_path = results_path,
     },
+    strategy = get_strategy_config(args.strategy, program, script_args),
+    env = args.env or config.get_env(),
   }
 end
 
@@ -164,6 +211,16 @@ setmetatable(NeotestAdapter, {
       config.get_filter_dirs = function()
         return opts.filter_dirs
       end
+    end
+    if is_callable(opts.env) then
+      config.get_env = opts.env
+    elseif type(opts.env) == "table" then
+      config.get_env = function ()
+        return opts.env
+      end
+    end
+    if type(opts.dap) == "table" then
+      dap_configuration = opts.dap
     end
     return NeotestAdapter
   end,
