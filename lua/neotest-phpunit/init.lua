@@ -59,6 +59,11 @@ local NeotestAdapter = { name = "neotest-phpunit" }
 function NeotestAdapter.root(dir)
   local result = nil
 
+  for _, root_ignore_file in ipairs(config.get_root_ignore_files()) do
+    result = lib.files.match_root_pattern(root_ignore_file)(dir)
+    if result then return nil end
+  end
+
   for _, root_file in ipairs(config.get_root_files()) do
     result = lib.files.match_root_pattern(root_file)(dir)
     if result then break end
@@ -196,6 +201,13 @@ setmetatable(NeotestAdapter, {
     elseif opts.phpunit_cmd then
       config.get_phpunit_cmd = function()
         return opts.phpunit_cmd
+      end
+    end
+    if is_callable(opts.root_ignore_files) then
+      config.get_root_ignore_files = opts.root_ignore_files
+    elseif opts.root_ignore_files then
+      config.get_root_ignore_files = function()
+        return opts.root_ignore_files
       end
     end
     if is_callable(opts.root_files) then
