@@ -108,6 +108,16 @@ require("neotest-phpunit")({
 })
 ```
 
+If there are projects you don't want discovered, you can instead set `root_ignore_files` to ignore any matching projects. 
+
+For example, if your project uses Pest and the appropriate [neotest adapter](https://github.com/V13Axel/neotest-pest), you'll need to set:
+
+```lua
+require("neotest-phpunit")({
+    root_ignore_files = { "tests/Pest.php" }
+})
+```
+
 ### Filtering directories
 
 By default, the adapter will search test files in all dirs in the root with the exception of `node_modules` and `.git`. You can change this with:
