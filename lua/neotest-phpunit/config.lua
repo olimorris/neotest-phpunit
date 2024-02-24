@@ -4,6 +4,14 @@ M.get_phpunit_cmd = function()
   return "vendor/bin/phpunit"
 end
 
+M.get_env = function()
+  return {}
+end
+
+M.get_root_ignore_files = function()
+  return {}
+end
+
 M.get_root_files = function()
   return { "composer.json", "phpunit.xml", ".gitignore" }
 end
