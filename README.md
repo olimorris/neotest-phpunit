@@ -6,8 +6,6 @@ This plugin provides a [PHPUnit](https://phpunit.de) adapter for the [Neotest](h
 
 <img width="1502" alt="Neotest and PHPUnit" src="https://user-images.githubusercontent.com/9512444/177888651-c55f8613-686a-40d0-8753-ca802ee6c000.png">
 
-:warning: _This plugin is still in the early stages of development. Please test against your PHPUnit tests_ :warning:
-
 ## :package: Installation
 
 Install with the package manager of your choice:
@@ -57,7 +55,8 @@ use({
 
 ### Default configuration
 
-> **Note**: You only need to the call the `setup` function if you wish to change any of the defaults.
+> [!NOTE]
+> You only need to the call the `setup` function if you wish to change any of the defaults.
 
 <details>
   <summary>Click to see the default configuration</summary>
