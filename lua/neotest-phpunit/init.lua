@@ -110,6 +110,16 @@ function NeotestAdapter.discover_positions(path)
         (name) @test.name
       ) @test.definition
     ))
+
+	(((method_declaration
+	  (attribute_list
+	    (attribute_group
+		  (attribute) @test_attribute (#match? @test_attribute "^Test$")
+		)
+	  )
+	  (name) @test.name
+	  )
+	)) @test.definition
   ]]
 
   return lib.treesitter.parse_positions(path, query, {
