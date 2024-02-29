@@ -102,7 +102,7 @@ function NeotestAdapter.discover_positions(path)
     )) @namespace.definition
 
     ((method_declaration
-      (name) @test.name (#match? @test.name "test")
+      (name) @test.name (#match? @test.name "^test")
     )) @test.definition
 
     (((comment) @test_comment (#match? @test_comment "\\@test") .
