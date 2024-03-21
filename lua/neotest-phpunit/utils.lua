@@ -60,9 +60,10 @@ local function make_outputs(test, output_file)
   local test_id = test_attr.file .. separator .. test_attr.line
   logger.info("PHPUnit id:", { test_id })
 
+  local classname = test_attr.classname or test_attr.class
   local test_output = {
     status = "passed",
-    short = string.upper(test_attr.classname) .. "\n-> " .. "PASSED" .. " - " .. test_attr.name,
+    short = string.upper(classname) .. "\n-> " .. "PASSED" .. " - " .. test_attr.name,
     output_file = output_file,
   }
 
