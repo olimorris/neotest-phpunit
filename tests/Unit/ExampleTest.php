@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExampleTest extends TestCase
 {
@@ -36,6 +37,17 @@ class ExampleTest extends TestCase
     {
         $this->assertTrue(true);
     }
+
+	public function this_test_should_not_run_also()
+	{
+		$this->assertTrue(true);
+	}
+
+	#[Test]
+	public function this_test_should_run()
+	{
+		$this->assertTrue(true);
+	}
 
     /**
      * @dataProvider myProvider

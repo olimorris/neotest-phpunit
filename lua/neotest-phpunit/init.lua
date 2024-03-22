@@ -106,7 +106,7 @@ function NeotestAdapter.discover_positions(path)
     )) @namespace.definition
 
     ((method_declaration
-      (name) @test.name (#match? @test.name "test")
+      (name) @test.name (#match? @test.name "^test")
     )) @test.definition
 
     (((comment) @test_comment (#match? @test_comment "\\@test") .
@@ -114,6 +114,16 @@ function NeotestAdapter.discover_positions(path)
         (name) @test.name
       ) @test.definition
     ))
+
+	(((method_declaration
+	  (attribute_list
+	    (attribute_group
+		  (attribute) @test_attribute (#match? @test_attribute "^Test$")
+		)
+	  )
+	  (name) @test.name
+	  )
+	)) @test.definition
   ]]
 
   return lib.treesitter.parse_positions(path, query, {
