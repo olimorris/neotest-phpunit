@@ -96,6 +96,10 @@ end
 ---@param file_path string Absolute file path
 ---@return neotest.Tree | nil
 function NeotestAdapter.discover_positions(path)
+  if not NeotestAdapter.is_test_file(path) then
+    return nil
+  end
+
   local query = [[
     ((class_declaration
       name: (name) @namespace.name (#match? @namespace.name "Test")
