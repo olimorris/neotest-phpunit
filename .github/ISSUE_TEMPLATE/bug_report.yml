@@ -110,7 +110,7 @@ body:
         label: Neotest logs
         description: |
           1. Wipe the `neotest.log` file in `stdpath("log")` or `stdpath("data")`.
-          2. Set `log_level = vim.log.levels.DEBUG` in your neotest config.
+          2. Ensure `log_level = vim.log.levels.DEBUG` is set in your minimal config.
           3. Reproduce the issue.
           4. Provide the new logs.
         placeholder: |
