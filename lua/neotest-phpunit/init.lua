@@ -13,23 +13,25 @@ local dap_configuration
 local function get_strategy_config(strategy, program, args)
   local cfg = {
     dap = function()
-      vim.validate({ dap = {
-        dap_configuration,
-        function (val)
-          local valid = type(val) == "table" and not vim.tbl_isempty(val)
+      vim.validate({
+        dap = {
+          dap_configuration,
+          function(val)
+            local valid = type(val) == "table" and not vim.tbl_isempty(val)
 
-          return valid, "Configure `dap` field (like in dap.configurations.php) before using this strategy"
-        end,
-        "not empty table"
-      }})
+            return valid, "Configure `dap` field (like in dap.configurations.php) before using this strategy"
+          end,
+          "not empty table",
+        },
+      })
       vim.validate({
         phpunit_cmd = {
           program,
-          function (val)
+          function(val)
             return type(val) == "string", "For `dap` strategy `phpunit_cmd` must be (or return) string."
           end,
           "string",
-        }
+        },
       })
 
       return vim.tbl_extend("keep", {
@@ -61,12 +63,16 @@ function NeotestAdapter.root(dir)
 
   for _, root_ignore_file in ipairs(config.get_root_ignore_files()) do
     result = lib.files.match_root_pattern(root_ignore_file)(dir)
-    if result then return nil end
+    if result then
+      return nil
+    end
   end
 
   for _, root_file in ipairs(config.get_root_files()) do
     result = lib.files.match_root_pattern(root_file)(dir)
-    if result then break end
+    if result then
+      break
+    end
   end
 
   return result
@@ -85,7 +91,9 @@ end
 ---@return boolean
 function NeotestAdapter.filter_dir(name)
   for _, filter_dir in ipairs(config.get_filter_dirs()) do
-    if name == filter_dir then return false end
+    if name == filter_dir then
+      return false
+    end
   end
 
   return true
@@ -121,7 +129,6 @@ function NeotestAdapter.discover_positions(path)
   })
 end
 
-
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec | nil
 function NeotestAdapter.build_spec(args)
@@ -137,7 +144,7 @@ function NeotestAdapter.build_spec(args)
   if position.type == "test" then
     local filter_args = vim.tbl_flatten({
       "--filter",
-      '::' .. position.name .. '( with data set .*)?$',
+      "::" .. position.name .. "( with data set .*)?$",
     })
 
     logger.info("position.path:", { position.path })
@@ -153,6 +160,8 @@ function NeotestAdapter.build_spec(args)
     program,
     script_args,
   })
+
+  logger.trace("PHPUnit command: ", { command })
 
   ---@type neotest.RunSpec
   return {
@@ -191,6 +200,7 @@ function NeotestAdapter.results(test, result, tree)
     return {}
   end
 
+  logger.trace("Results:", results)
   return results
 end
 
@@ -231,7 +241,7 @@ setmetatable(NeotestAdapter, {
     if is_callable(opts.env) then
       config.get_env = opts.env
     elseif type(opts.env) == "table" then
-      config.get_env = function ()
+      config.get_env = function()
         return opts.env
       end
     end
