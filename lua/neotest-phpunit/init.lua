@@ -114,6 +114,18 @@ function NeotestAdapter.discover_positions(path)
     )) @namespace.definition
 
     ((method_declaration
+      (attribute_list
+        (attribute_group
+            (attribute) @test_attribute (#match? @test_attribute "Test")
+        )
+      )
+      (
+        (visibility_modifier) @test.definition
+        (name) @test.name
+      )
+     ))
+
+    ((method_declaration
       (name) @test.name (#match? @test.name "test")
     )) @test.definition
 
