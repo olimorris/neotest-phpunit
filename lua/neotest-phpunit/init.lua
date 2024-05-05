@@ -120,9 +120,9 @@ function NeotestAdapter.discover_positions(path)
         )
       )
       (
-        (visibility_modifier) @test.definition
+        (visibility_modifier)
         (name) @test.name
-      )
+      ) @test.definition
      ))
 
     ((method_declaration
