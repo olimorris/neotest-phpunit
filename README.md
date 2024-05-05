@@ -107,7 +107,7 @@ require("neotest-phpunit")({
 })
 ```
 
-If there are projects you don't want discovered, you can instead set `root_ignore_files` to ignore any matching projects. 
+If there are projects you don't want discovered, you can instead set `root_ignore_files` to ignore any matching projects.
 
 For example, if your project uses Pest and the appropriate [neotest adapter](https://github.com/V13Axel/neotest-pest), you'll need to set:
 
@@ -135,9 +135,12 @@ require("neotest-phpunit")({
 })
 ```
 
-### Debugging with `dap` strategy
+### Debugging
 
-You need to install and configure [nvim-dap](https://github.com/mfussenegger/nvim-dap) with [vscode-php-debug](https://github.com/xdebug/vscode-php-debug) first. For example if you have
+The plugin can also be used for debugging via a dap strategy.
+
+Firstly, install and configure [nvim-dap](https://github.com/mfussenegger/nvim-dap) with [vscode-php-debug](https://github.com/xdebug/vscode-php-debug). Then set the following dap configuration:
+
 ```lua
 dap.configurations.php = {
   {
@@ -164,7 +167,9 @@ dap.configurations.php = {
   }
 }
 ```
-you can set
+
+Then in the plugin's config, add:
+
 ```lua
 require("neotest-phpunit")({
   env = {
@@ -174,10 +179,8 @@ require("neotest-phpunit")({
 })
 ```
 
-If you run a test with `dap` strategy from the summary window (by default by `d`) and see that window content replaced by debugged buffer content then consider setting `dap.defaults.fallback.switchbuf` or Neovim level [`switchbuf`](https://neovim.io/doc/user/options.html#'switchbuf'), f.e.
-```lua
-dap.defaults.fallback.switchbuf = "useopen"
-```
+> [!NOTE]
+> If you run a test with the `dap` strategy from the summary window (by default by `d`) and see that the window content has been replaced by debugger content then consider setting `dap.defaults.fallback.switchbuf = "useopen"` or Neovim level [`switchbuf`](https://neovim.io/doc/user/options.html#'switchbuf')
 
 ## :rocket: Usage
 
