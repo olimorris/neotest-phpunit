@@ -52,4 +52,41 @@ class ExampleTest extends TestCase
             'set two' => [false],
         ];
     }
+
+    /**
+     * @dataProvider myProviderEndingWithAllTrue
+     */
+    public function testWithDataProviderShouldPassIfAllTrue(bool $val): void
+    {
+        $this->assertTrue($val);
+    }
+
+    public static function myProviderEndingWithAllTrue(): array
+    {
+        return [
+            [true],
+            [true],
+            [true],
+            [true],
+        ];
+    }
+
+    /**
+     * @dataProvider myProviderWithFailure
+     */
+    public function testWithDataProviderShouldFailIfAnyFailure(bool $val): void
+    {
+        $this->assertTrue($val);
+    }
+
+    public static function myProviderWithFailure(): array
+    {
+        return [
+            [true],
+            [false],
+            [true],
+            [true],
+        ];
+    }
 }
+

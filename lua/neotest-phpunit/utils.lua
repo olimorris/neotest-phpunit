@@ -90,7 +90,11 @@ local function iterate_test_outputs(tests, output_file, output_table)
   for i = 1, #tests, 1 do
     if #tests[i] == 0 then
       local test_id, test_output = make_outputs(tests[i], output_file)
-      output_table[test_id] = test_output
+      if output_table[test_id] ~= nil and output_table[test_id].status == "failed" then
+        -- keep previously failed result
+      else
+        output_table[test_id] = test_output
+      end
     else
       iterate_test_outputs(tests[i], output_file, output_table)
     end
