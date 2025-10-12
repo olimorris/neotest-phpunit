@@ -69,13 +69,33 @@ local function make_outputs(test, output_file)
 
   local test_failed = errors_or_fails(test)
   if test_failed then
+    local error_message = test_failed[1][1]
     test_output.status = "failed"
-    test_output.short = test_failed[1]["failure"] or test_failed[1]["errors"]
-    test_output.errors = {
-      {
-        line = test_attr.line,
-      },
-    }
+    test_output.short = error_message
+    
+    local errors = {}
+    
+    -- Extract error lines from the stack trace
+    -- Format: /path/to/file.php:123
+    for line_info in error_message:gmatch("([^\n]+%.php:%d+)") do
+      local file, line = line_info:match("(.+):(%d+)")
+      if file and line and file == test_attr.file then
+        table.insert(errors, {
+          line = tonumber(line) - 1,
+          message = error_message,
+        })
+      end
+    end
+    
+    -- If no matching errors found in the file, add error at test line
+    if #errors == 0 then
+      table.insert(errors, {
+        line = tonumber(test_attr.line) - 1,
+        message = error_message,
+      })
+    end
+    
+    test_output.errors = errors
   end
 
   return test_id, test_output

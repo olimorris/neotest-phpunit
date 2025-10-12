@@ -152,10 +152,18 @@ Failed asserting that false is true.
       ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::12"] = {
         errors = {
           {
-            line = "12",
+            line = 13,
+            message = [[ExampleTest::test_that_false_is_true
+Failed asserting that false is true.
+
+/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php:14]],
           },
         },
         output_file = "/tmp/nvimhYaIPj/3",
+        short = [[ExampleTest::test_that_false_is_true
+Failed asserting that false is true.
+
+/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php:14]],
         status = "failed",
       },
     }
@@ -390,10 +398,18 @@ Failed asserting that false is true.
       ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::13"] = {
         errors = {
           {
-            line = "13",
+            line = 14,
+            message = [[ExampleTest::this_should_fail
+Failed asserting that false is true.
+
+/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php:15]],
           },
         },
         output_file = "/tmp/nvimhYaIPj/3",
+        short = [[ExampleTest::this_should_fail
+Failed asserting that false is true.
+
+/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php:15]],
         status = "failed",
       },
       ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::7"] = {
@@ -401,6 +417,91 @@ Failed asserting that false is true.
         short = [[EXAMPLETEST
 -> PASSED - test_that_true_is_true]],
         status = "passed",
+      },
+    }
+
+    assert.are.same(utils.get_test_results(xml_output, output_file), expected)
+  end)
+
+  it("parses PHPUnit 11 error output correctly", function()
+    local output_file = "/tmp/phpunit11-output.xml"
+    local xml_output = {
+      testsuites = {
+        testsuite = {
+          _attr = {
+            assertions = "2",
+            errors = "1",
+            failures = "0",
+            file = "/path/to/tests/Unit/ExampleTest.php",
+            name = "ExampleTest",
+            skipped = "0",
+            tests = "2",
+            time = "0.005",
+            warnings = "0",
+          },
+          testcase = {
+            {
+              _attr = {
+                assertions = "1",
+                class = "ExampleTest",
+                classname = "ExampleTest",
+                file = "/path/to/tests/Unit/ExampleTest.php",
+                line = "10",
+                name = "test_example_passes",
+                time = "0.001",
+              },
+            },
+            {
+              _attr = {
+                assertions = "1",
+                class = "ExampleTest",
+                classname = "ExampleTest",
+                file = "/path/to/tests/Unit/ExampleTest.php",
+                line = "15",
+                name = "test_example_fails",
+                time = "0.002",
+              },
+              error = {
+                [[ExampleTest::test_example_fails
+ErrorException: Undefined property: App\Models\User::$middleName
+
+/path/to/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php:258
+/path/to/tests/Unit/ExampleTest.php:20]],
+                _attr = {
+                  type = "ErrorException",
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+
+    local expected = {
+      ["/path/to/tests/Unit/ExampleTest.php::10"] = {
+        output_file = "/tmp/phpunit11-output.xml",
+        short = [[EXAMPLETEST
+-> PASSED - test_example_passes]],
+        status = "passed",
+      },
+      ["/path/to/tests/Unit/ExampleTest.php::15"] = {
+        errors = {
+          {
+            line = 19,
+            message = [[ExampleTest::test_example_fails
+ErrorException: Undefined property: App\Models\User::$middleName
+
+/path/to/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php:258
+/path/to/tests/Unit/ExampleTest.php:20]],
+          },
+        },
+        output_file = "/tmp/phpunit11-output.xml",
+        short = [[ExampleTest::test_example_fails
+ErrorException: Undefined property: App\Models\User::$middleName
+
+/path/to/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php:258
+/path/to/tests/Unit/ExampleTest.php:20]],
+        status = "failed",
       },
     }
 
