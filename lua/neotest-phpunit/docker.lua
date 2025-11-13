@@ -23,18 +23,18 @@ local job_result_ok = function(job)
 end
 
 M.cache = {
-  daemon_is_running = nil,
-  root_path = nil,
-  container_id = nil,
-  working_dir = nil,
-  shell_path = nil,
-  phpunit_path = nil,
+  daemon = nil,
+  root = nil,
+  container = nil,
+  workdir = nil,
+  shell = nil,
+  phpunit = nil,
 }
 
 M.daemon_is_running = function()
-  if M.cache.daemon_is_running then
-    logger.debug("Using cached Docker running state: " .. tostring(M.cache.daemon_is_running))
-    return M.cache.daemon_is_running
+  if M.cache.daemon then
+    logger.debug("Using cached Docker running state: " .. tostring(M.cache.daemon))
+    return M.cache.daemon
   end
 
   local job = Job:new({
@@ -47,22 +47,22 @@ M.daemon_is_running = function()
     return job.code
   end)
 
-  M.cache.daemon_is_running = ok and code == 0
+  M.cache.daemon = ok and code == 0
 
-  return M.cache.daemon_is_running
+  return M.cache.daemon
 end
 
 M.get_root_path = function()
-  if M.cache.root_path then
-    return M.cache.root_path
+  if M.cache.root then
+    return M.cache.root
   end
 
   for _, dockerfile in ipairs(docker_files) do
     local path = lib.files.match_root_pattern(dockerfile)(vim.fn.getcwd())
     if path then
-      M.cache.root_path = path
+      M.cache.root = path
 
-      return M.cache.root_path
+      return M.cache.root
     end
   end
 end
@@ -70,8 +70,8 @@ end
 M.root_path = M.get_root_path()
 
 M.get_container_id = function(name)
-  if M.cache.container_id then
-    return M.cache.container_id
+  if M.cache.container then
+    return M.cache.container
   end
 
   local job = Job:new({
@@ -86,31 +86,32 @@ M.get_container_id = function(name)
     return nil
   end
 
-  M.cache.container_id = id
-  return M.cache.container_id
+  M.cache.container = id
+  return M.cache.container
 end
 
 M.get_working_dir = function(container_id)
-  if M.cache.working_dir then
-    return M.cache.working_dir
+  if M.cache.workdir then
+    return M.cache.workdir
   end
 
   local job = Job:new({
     command = docker_cmd,
     args = { "inspect", "--format", "{{.Config.WorkingDir}}", container_id },
   })
+
   local dir = job_result_ok(job)
 
   if dir then
-    M.cache.working_dir = dir
+    M.cache.workdir = dir
   end
 
-  return M.cache.working_dir
+  return M.cache.workdir
 end
 
 M.get_shell_path = function(container_id)
-  if M.cache.shell_path then
-    return M.cache.shell_path
+  if M.cache.shell then
+    return M.cache.shell
   end
 
   local job = Job:new({
@@ -128,16 +129,18 @@ M.get_shell_path = function(container_id)
   local shell = job_result_ok(job)
 
   if shell then
-    M.cache.shell_path = shell
+    M.cache.shell = shell
   end
 
-  return M.cache.shell_path
+  return M.cache.shell
 end
 
-M.get_phpunit_path = function(container_id, shell_path)
-  if M.cache.phpunit_path then
-    return M.cache.phpunit_path
+M.get_phpunit_path = function(container_id, shell_path, config_phpunit_cmd)
+  if M.cache.phpunit then
+    return M.cache.phpunit
   end
+
+  local default_phpunit_cmd = config_phpunit_cmd or "bin/phpunit"
 
   local job = Job:new({
     command = docker_cmd,
@@ -147,17 +150,20 @@ M.get_phpunit_path = function(container_id, shell_path)
       container_id,
       shell_path,
       "-c",
-      "if [ -f vendor/bin/phpunit ]; then echo vendor/bin/phpunit; else echo bin/phpunit; fi | tr -d '\r'",
+      string.format(
+        "if [ -f vendor/bin/phpunit ]; then echo vendor/bin/phpunit; else echo %s; fi | tr -d '\r'",
+        default_phpunit_cmd
+      ),
     },
   })
 
   local phpunit_path = job_result_ok(job)
 
   if phpunit_path then
-    M.cache.phpunit_path = phpunit_path
+    M.cache.phpunit = phpunit_path
   end
 
-  return M.cache.phpunit_path
+  return M.cache.phpunit
 end
 
 M.translate_path_to_container = function(host_path, docker_workdir_path)
@@ -187,7 +193,27 @@ M.build_script_args = function(args, coverage_config)
   return table.concat(result, " ")
 end
 
-M.get_docker_cmd = function(args, config, coverage)
+M.patch_dap_config = function(dap_config, args)
+  dap_config.program = args.phpunit_path
+  dap_config.args =
+    vim.split(M.translate_path_to_container(table.concat(args.phpunit_args, " "), args.docker_workdir), " ")
+  dap_config.runtimeExecutable = docker_cmd
+  dap_config.runtimeArgs = {
+    "exec",
+    "-w",
+    args.docker_workdir,
+    args.container_id,
+    "php",
+    "-dxdebug.mode=debug",
+    "-dxdebug.discover_client_host=1",
+    "-dxdebug.client_host=host.docker.internal",
+    "-dxdebug.client_port=9003",
+    "-dxdebug.start_with_request=yes",
+    "-dxdebug.idekey=neovim",
+  }
+end
+
+M.get_docker_cmd = function(args, config, coverage, dap_config)
   local container_id = M.get_container_id(config.container)
   local shell_path = M.get_shell_path(container_id)
   local phpunit_path = M.get_phpunit_path(container_id, shell_path)
@@ -201,7 +227,16 @@ M.get_docker_cmd = function(args, config, coverage)
   }, coverage)
 
   local docker_exec_cmd =
-    { docker_cmd, config.args, { "-w", docker_workdir_path }, container_id, shell_path, "-c", script }
+    { docker_cmd, "exec", "-i", { "-w", docker_workdir_path }, container_id, shell_path, "-c", script }
+
+  if dap_config then
+    M.patch_dap_config(dap_config, {
+      phpunit_path = phpunit_path,
+      phpunit_args = args.script_args,
+      container_id = container_id,
+      docker_workdir = docker_workdir_path,
+    })
+  end
 
   return vim.iter(docker_exec_cmd):flatten():totable()
 end

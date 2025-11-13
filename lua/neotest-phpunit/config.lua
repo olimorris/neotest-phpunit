@@ -22,12 +22,8 @@ end
 
 M.get_docker_options = function()
   return {
-    enabled = true,
+    enabled = false,
     container = "php",
-    args = {
-      "exec",
-      "-i",
-    },
     workdir = nil,
   }
 end
