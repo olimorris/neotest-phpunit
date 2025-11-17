@@ -187,7 +187,7 @@ function NeotestAdapter.build_spec(args)
 end
 
 ---@async
----@param spec neotest.RunSpec
+---@param test neotest.RunSpec
 ---@param result neotest.StrategyResult
 ---@param tree neotest.Tree
 ---@return neotest.Result[]
