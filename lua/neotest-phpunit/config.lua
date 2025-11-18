@@ -20,4 +20,20 @@ M.get_filter_dirs = function()
   return { ".git", "node_modules" }
 end
 
+M.get_docker_options = function()
+  return {
+    enabled = false,
+    container = "php",
+    workdir = nil,
+  }
+end
+
+M.get_coverage_options = function()
+  return {
+    enabled = false,
+    args = "--coverage-cobertura",
+    path = "coverage/cobertura.xml",
+  }
+end
+
 return M

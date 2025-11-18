@@ -71,6 +71,16 @@ adapters = {
     filter_dirs = { ".git", "node_modules" },
     env = {}, -- for example {XDEBUG_CONFIG = 'idekey=neotest'}
     dap = nil, -- to configure `dap` strategy put single element from `dap.configurations.php`
+    docker = {
+      enabled = false,
+      container = "php", -- autodetect container name
+      workdir = nil, -- autodetect workdir if not provided
+    },
+    coverage = {
+      enabled = false,
+      args = "--coverage-cobertura",
+      path = "coverage/cobertura.xml",
+    },
   }),
 }
 ```
@@ -181,6 +191,34 @@ require("neotest-phpunit")({
 
 > [!NOTE]
 > If you run a test with the `dap` strategy from the summary window (by default by `d`) and see that the window content has been replaced by debugger content then consider setting `dap.defaults.fallback.switchbuf = "useopen"` or Neovim level [`switchbuf`](https://neovim.io/doc/user/options.html#'switchbuf')
+
+### Docker
+
+Run tests from docker container.
+
+```lua
+require("neotest-phpunit")({
+  docker = {
+    enabled = false,
+    container = "php",
+    workdir = nil,
+  },
+})
+```
+
+### Coverage
+
+Add support for nvim-coverage.
+
+```lua
+require("neotest-phpunit")({
+  coverage = {
+    enabled = false,
+    args = "--coverage-cobertura",
+    path = "coverage/cobertura.xml",
+  },
+})
+```
 
 ## :rocket: Usage
 
