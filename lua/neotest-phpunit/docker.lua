@@ -233,7 +233,8 @@ end
 
 ---Copy test results to host machine
 ---@param output_path string
-function Docker.copy_to_host(output_path)
+---@param coverage_config config.coverage
+function Docker.copy_to_host(output_path, coverage_config)
   vim.system({ Docker.cmd, "cp", "-a", Docker.get_container_id() .. ":" .. output_path, output_path }):wait()
   vim
     .system({
@@ -244,6 +245,16 @@ function Docker.copy_to_host(output_path)
       output_path,
     })
     :wait()
+
+  if coverage_config.enabled then
+    vim.system({
+      Docker.cmd,
+      "cp",
+      "-a",
+      Docker.get_container_id() .. ":" .. coverage_config.path,
+      Docker.root_path .. "/" .. coverage_config.path,
+    })
+  end
 end
 
 return Docker

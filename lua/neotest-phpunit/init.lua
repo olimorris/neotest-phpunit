@@ -149,11 +149,16 @@ function NeotestAdapter.build_spec(args)
   local results_path = async.fn.tempname()
   local program = config.get_phpunit_cmd()
   local docker_config = config.get_docker_options()
+  local coverage_options = config.get_coverage_options()
 
   local script_args = {
     position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
   }
+
+  if coverage_options.enabled then
+    table.insert(script_args, coverage_options.args .. " " .. coverage_options.path)
+  end
 
   if position.type == "test" then
     local filter_args = vim
@@ -228,7 +233,7 @@ function NeotestAdapter.results(test, result, tree)
   local output_file = test.context.results_path
 
   if config.get_docker_options().enabled and docker.get_container_id() ~= "" then
-    docker.copy_to_host(output_file)
+    docker.copy_to_host(output_file, config.get_coverage_options())
   end
 
   local ok, data = pcall(lib.files.read, output_file)
@@ -302,6 +307,16 @@ setmetatable(NeotestAdapter, {
     elseif type(opts.docker) == "table" then
       config.get_docker_options = function()
         return vim.tbl_deep_extend("force", default_docker_options, opts.docker)
+      end
+    end
+    local default_coverage_options = vim.deepcopy(config.get_coverage_options())
+    if is_callable(opts.coverage) then
+      config.get_coverage_options = function()
+        return vim.tbl_deep_extend("force", default_coverage_options, opts.coverage())
+      end
+    elseif type(opts.coverage) == "table" then
+      config.get_coverage_options = function()
+        return vim.tbl_deep_extend("force", default_coverage_options, opts.coverage)
       end
     end
     if type(opts.dap) == "table" then

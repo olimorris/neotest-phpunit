@@ -34,4 +34,16 @@ M.get_docker_options = function()
   }
 end
 
+---@class config.coverage
+---@field enabled boolean
+---@field args string
+---@field path string
+M.get_coverage_options = function()
+  return {
+    enabled = false,
+    args = "--coverage-cobertura",
+    path = "coverage/cobertura.xml",
+  }
+end
+
 return M

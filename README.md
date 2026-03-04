@@ -77,6 +77,11 @@ adapters = {
       container_port = "9000",
       container_workdir = nil,
     },
+    coverage = {
+      enabled = false,
+      args = "--coverage-cobertura",
+      path = "coverage/cobertura.xml",
+    },
   }),
 }
 ```
