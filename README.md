@@ -67,6 +67,7 @@ adapters = {
     phpunit_cmd = function()
       return "vendor/bin/phpunit" -- for `dap` strategy then it must return string (table values will cause validation error)
     end,
+    phpunit_args = {},
     root_files = { "composer.json", "phpunit.xml", ".gitignore" },
     filter_dirs = { ".git", "node_modules" },
     env = {}, -- for example {XDEBUG_CONFIG = 'idekey=neotest'}
@@ -88,6 +89,24 @@ require("neotest-phpunit")({
   end
 })
 ```
+
+### Additional arguments
+
+You can provide additional PHPUnit arguments via `phpunit_args` option, either a function or a plain table:
+
+```lua
+require("neotest-phpunit")({
+  phpunit_args = function()
+    return { "--configuration=alternative.xml" }
+  end
+  -- or
+  -- phpunit_args = { "--configuration=alternative.xml" }
+})
+```
+
+Some of the arguments may be filtered out if they prevent a runner from obtaining the results of a test in expected
+format. Namely, `--log-junit` will be skipped, since it may interfere with the internal handling of the runner results.
+
 
 ### Setting the root directory
 

@@ -148,6 +148,8 @@ function NeotestAdapter.build_spec(args)
   local results_path = async.fn.tempname()
   local program = config.get_phpunit_cmd()
 
+  local phpunit_args = utils.filter_phpunit_args(config.get_phpunit_args())
+
   local script_args = {
     position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
@@ -170,6 +172,7 @@ function NeotestAdapter.build_spec(args)
 
   local command = vim.tbl_flatten({
     program,
+    phpunit_args,
     script_args,
   })
 
@@ -227,6 +230,13 @@ setmetatable(NeotestAdapter, {
     elseif opts.phpunit_cmd then
       config.get_phpunit_cmd = function()
         return opts.phpunit_cmd
+      end
+    end
+    if is_callable(opts.phpunit_args) then
+      config.get_phpunit_args = opts.phpunit_args
+    elseif opts.phpunit_args then
+      config.get_phpunit_args = function()
+        return opts.phpunit_args
       end
     end
     if is_callable(opts.root_ignore_files) then

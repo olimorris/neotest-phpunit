@@ -72,9 +72,9 @@ local function make_outputs(test, output_file)
     local error_message = test_failed[1][1]
     test_output.status = "failed"
     test_output.short = error_message
-    
+
     local errors = {}
-    
+
     -- Extract error lines from the stack trace
     -- Format: /path/to/file.php:123
     for line_info in error_message:gmatch("([^\n]+%.php:%d+)") do
@@ -86,7 +86,7 @@ local function make_outputs(test, output_file)
         })
       end
     end
-    
+
     -- If no matching errors found in the file, add error at test line
     if #errors == 0 then
       table.insert(errors, {
@@ -94,7 +94,7 @@ local function make_outputs(test, output_file)
         message = error_message,
       })
     end
-    
+
     test_output.errors = errors
   end
 
@@ -129,6 +129,24 @@ end
 M.get_test_results = function(parsed_xml_output, output_file)
   local tests = iterate_key(parsed_xml_output, "testcase", {})
   return iterate_test_outputs(tests, output_file, {})
+end
+
+M.filter_phpunit_args = function(args)
+  local trim = function(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+  end
+
+  local result = {}
+  for _, v in ipairs(args) do
+    local t = trim(v)
+
+    -- skip some arguments that may affect expected results of a test runner
+    if not t:match("^%-%-log%-junit") then
+      result[#result + 1] = t
+    end
+  end
+
+  return result
 end
 
 return M
