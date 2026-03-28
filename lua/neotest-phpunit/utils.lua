@@ -9,7 +9,7 @@ local separator = "::"
 ---@return string
 M.make_test_id = function(position)
   -- Treesitter starts line numbers from 0 so we add 1
-  local id = position.path .. separator .. (tonumber(position.range[1]) + 1)
+  local id = position.path .. separator .. position.name
 
   logger.info("Path to test file:", { position.path })
   logger.info("Treesitter id:", { id })
@@ -57,7 +57,7 @@ end
 local function make_outputs(test, output_file)
   local test_attr = test["_attr"] or test[1]["_attr"]
 
-  local test_id = test_attr.file .. separator .. test_attr.line
+  local test_id = test_attr.file .. separator .. test_attr.name
   logger.info("PHPUnit id:", { test_id })
 
   local classname = test_attr.classname or test_attr.class

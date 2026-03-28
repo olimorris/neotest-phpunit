@@ -33,7 +33,7 @@ describe("get_test_results", function()
     }
 
     local expected = {
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::7"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::test_that_true_is_true"] = {
         ["output_file"] = "/tmp/nvimhYaIPj/3",
         ["short"] = [[EXAMPLETEST
 -> PASSED - test_that_true_is_true]],
@@ -89,13 +89,13 @@ describe("get_test_results", function()
     }
 
     local expected = {
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::13"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testClassConstructor"] = {
         ["output_file"] = "/tmp/nvimhYaIPj/3",
         ["short"] = [[TESTPROJECT.USERTEST
 -> PASSED - testClassConstructor]],
         ["status"] = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::22"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testTellName"] = {
         ["output_file"] = "/tmp/nvimhYaIPj/3",
         ["short"] = [[TESTPROJECT.USERTEST
 -> PASSED - testTellName]],
@@ -149,7 +149,7 @@ Failed asserting that false is true.
     }
 
     local expected = {
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::12"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::test_that_false_is_true"] = {
         errors = {
           {
             line = 13,
@@ -359,43 +359,43 @@ Failed asserting that false is true.
     }
 
     local expected = {
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::13"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testClassConstructor"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[TESTPROJECT.USERTEST
 -> PASSED - testClassConstructor]],
         status = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::22"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testTellName"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[TESTPROJECT.USERTEST
 -> PASSED - testTellName]],
         status = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::30"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testTellAge"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[TESTPROJECT.USERTEST
 -> PASSED - testTellAge]],
         status = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::38"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testAddFavoriteMovie"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[TESTPROJECT.USERTEST
 -> PASSED - testAddFavoriteMovie]],
         status = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::47"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/UserTest.php::testRemoveFavoriteMovie"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[TESTPROJECT.USERTEST
 -> PASSED - testRemoveFavoriteMovie]],
         status = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/some/deep/nesting/NestingTest.php::7"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Examples/some/deep/nesting/NestingTest.php::test_something_that_is_true"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[NESTINGTEST
 -> PASSED - test_something_that_is_true]],
         status = "passed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::13"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::this_should_fail"] = {
         errors = {
           {
             line = 14,
@@ -412,7 +412,7 @@ Failed asserting that false is true.
 /Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php:15]],
         status = "failed",
       },
-      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::7"] = {
+      ["/Users/Oli/Code/Projects/neotest-phpunit/tests/Unit/ExampleTest.php::test_that_true_is_true"] = {
         output_file = "/tmp/nvimhYaIPj/3",
         short = [[EXAMPLETEST
 -> PASSED - test_that_true_is_true]],
@@ -478,13 +478,13 @@ ErrorException: Undefined property: App\Models\User::$middleName
     }
 
     local expected = {
-      ["/path/to/tests/Unit/ExampleTest.php::10"] = {
+      ["/path/to/tests/Unit/ExampleTest.php::test_example_passes"] = {
         output_file = "/tmp/phpunit11-output.xml",
         short = [[EXAMPLETEST
 -> PASSED - test_example_passes]],
         status = "passed",
       },
-      ["/path/to/tests/Unit/ExampleTest.php::15"] = {
+      ["/path/to/tests/Unit/ExampleTest.php::test_example_fails"] = {
         errors = {
           {
             line = 19,
