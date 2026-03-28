@@ -71,6 +71,17 @@ adapters = {
     filter_dirs = { ".git", "node_modules" },
     env = {}, -- for example {XDEBUG_CONFIG = 'idekey=neotest'}
     dap = nil, -- to configure `dap` strategy put single element from `dap.configurations.php`
+    docker = {
+      enabled = false,
+      container_name = "php",
+      container_port = "9000",
+      container_workdir = nil,
+    },
+    coverage = {
+      enabled = false,
+      args = "--coverage-cobertura",
+      path = "coverage/cobertura.xml",
+    },
   }),
 }
 ```

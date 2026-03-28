@@ -7,6 +7,7 @@ local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local utils = require("neotest-phpunit.utils")
 local config = require("neotest-phpunit.config")
+local docker = require("neotest-phpunit.docker")
 
 local dap_configuration
 
@@ -147,33 +148,70 @@ function NeotestAdapter.build_spec(args)
   local position = args.tree:data()
   local results_path = async.fn.tempname()
   local program = config.get_phpunit_cmd()
+  local docker_config = config.get_docker_options()
+  local coverage_options = config.get_coverage_options()
 
   local script_args = {
     position.name ~= "tests" and position.path,
     "--log-junit=" .. results_path,
   }
 
+  if coverage_options.enabled then
+    table.insert(script_args, coverage_options.args .. " " .. coverage_options.path)
+  end
+
   if position.type == "test" then
-    local filter_args = vim.tbl_flatten({
-      "--filter",
-      "::" .. position.name .. "( with data set .*)?$",
-    })
+    local filter_args = vim
+      .iter({
+        "--filter",
+        '"::' .. position.name .. '( with data set .*)?$"',
+      })
+      :flatten()
+      :totable()
 
     logger.info("position.path:", { position.path })
     logger.info("--filter position.name:", { position.name })
 
-    script_args = vim.tbl_flatten({
-      script_args,
-      filter_args,
-    })
+    script_args = vim
+      .iter({
+        script_args,
+        filter_args,
+      })
+      :flatten()
+      :totable()
   end
 
-  local command = vim.tbl_flatten({
-    program,
-    script_args,
-  })
+  local command = vim
+    .iter({
+      program,
+      script_args,
+    })
+    :flatten()
+    :totable()
 
   logger.trace("PHPUnit command: ", { command })
+
+  local dap_strategy = get_strategy_config(args.strategy, program, script_args)
+
+  if docker_config.enabled then
+    local docker_cmd = docker.build_cmd({
+      env = args.env or config.get_env(),
+      phpunit_cmd = program,
+      script_args = script_args,
+    }, docker_config)
+
+    if docker_cmd then
+      command = docker_cmd
+    end
+
+    if dap_strategy then
+      local docker_dap_config = docker.dap_config(dap_strategy, {
+        phpunit_cmd = program,
+        script_args = script_args,
+      })
+      dap_strategy = docker_dap_config
+    end
+  end
 
   ---@type neotest.RunSpec
   return {
@@ -181,7 +219,7 @@ function NeotestAdapter.build_spec(args)
     context = {
       results_path = results_path,
     },
-    strategy = get_strategy_config(args.strategy, program, script_args),
+    strategy = dap_strategy,
     env = args.env or config.get_env(),
   }
 end
@@ -193,6 +231,10 @@ end
 ---@return neotest.Result[]
 function NeotestAdapter.results(test, result, tree)
   local output_file = test.context.results_path
+
+  if config.get_docker_options().enabled and docker.get_container_id() ~= "" then
+    docker.copy_to_host(output_file, config.get_coverage_options())
+  end
 
   local ok, data = pcall(lib.files.read, output_file)
   if not ok then
@@ -255,6 +297,26 @@ setmetatable(NeotestAdapter, {
     elseif type(opts.env) == "table" then
       config.get_env = function()
         return opts.env
+      end
+    end
+    local default_docker_options = vim.deepcopy(config.get_docker_options())
+    if is_callable(opts.docker) then
+      config.get_docker_options = function()
+        return vim.tbl_deep_extend("force", default_docker_options, opts.docker())
+      end
+    elseif type(opts.docker) == "table" then
+      config.get_docker_options = function()
+        return vim.tbl_deep_extend("force", default_docker_options, opts.docker)
+      end
+    end
+    local default_coverage_options = vim.deepcopy(config.get_coverage_options())
+    if is_callable(opts.coverage) then
+      config.get_coverage_options = function()
+        return vim.tbl_deep_extend("force", default_coverage_options, opts.coverage())
+      end
+    elseif type(opts.coverage) == "table" then
+      config.get_coverage_options = function()
+        return vim.tbl_deep_extend("force", default_coverage_options, opts.coverage)
       end
     end
     if type(opts.dap) == "table" then
