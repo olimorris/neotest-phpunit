@@ -164,7 +164,7 @@ function NeotestAdapter.build_spec(args)
     local filter_args = vim
       .iter({
         "--filter",
-        "::" .. position.name,
+        '"::' .. position.name .. '( with data set .*)?$"',
       })
       :flatten()
       :totable()
