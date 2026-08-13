@@ -69,6 +69,9 @@ adapters = {
     end,
     root_files = { "composer.json", "phpunit.xml", ".gitignore" },
     filter_dirs = { ".git", "node_modules" },
+    is_test_file = function(file_path)
+      return vim.endswith(file_path, "Test.php")
+    end,
     env = {}, -- for example {XDEBUG_CONFIG = 'idekey=neotest'}
     dap = nil, -- to configure `dap` strategy put single element from `dap.configurations.php`
   }),
