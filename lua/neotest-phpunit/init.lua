@@ -82,7 +82,7 @@ end
 ---@param file_path string
 ---@return boolean
 function NeotestAdapter.is_test_file(file_path)
-  return vim.endswith(file_path, "Test.php")
+  return config.get_is_test_file(file_path)
 end
 
 ---Filter directories when searching for test files
@@ -248,6 +248,13 @@ setmetatable(NeotestAdapter, {
     elseif opts.filter_dirs then
       config.get_filter_dirs = function()
         return opts.filter_dirs
+      end
+    end
+    if is_callable(opts.is_test_file) then
+      config.get_is_test_file = opts.is_test_file
+    elseif opts.is_test_file then
+      config.get_is_test_file = function()
+        return opts.is_test_file
       end
     end
     if is_callable(opts.env) then
