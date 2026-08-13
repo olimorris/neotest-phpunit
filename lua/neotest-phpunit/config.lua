@@ -20,7 +20,7 @@ M.get_filter_dirs = function()
   return { ".git", "node_modules" }
 end
 
-M.is_test_file = function(file_path)
+M.get_is_test_file = function(file_path)
   return vim.endswith(file_path, "Test.php")
 end
 
